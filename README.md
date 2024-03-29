@@ -13,7 +13,7 @@
 - src/pages/index.html — HTML-файл главной страницы
 - src/types/index.ts — файл с типами
 - src/index.ts — точка входа приложения
-- src/styles/styles.scss — корневой файл стилей
+- src/scss/styles.scss — корневой файл стилей
 - src/utils/constants.ts — файл с константами
 - src/utils/utils.ts — файл с утилитами
 
@@ -45,69 +45,191 @@ npm run build
 yarn build
 ```
 
-Базовый код
+!Базовый код
 
-1. Класс Store<T>
+1. Класс Component<T>
 
-Класс проекта реализующий методы для создания заказа и отображения товаров.
-Конструктор не принимает аргументов
+Находится в основе практически всех частей проекта, реализует методы для управления компонентами (изменения текста/изображения, переключение класса и рендер).
+Класс является дженериком и в переменной Т принимает тип данных компонентов.
 
-Содержит следующие свойства:
+Конструктор принимает элемент с которым будет происходить взаимодействие.
+Класс имеет такие методы:
 
-- api: Api - класс для взаимодействия с внешним Api
-- User: User - класс для взаимодействия с пользовательскими данными
-- Cart: Cart - класс для взаимодействия с корзиной
+- setText, setImage, toggleClass для изменения состояния элементов.
+- render для заполнения свойств элемента и получения его в формате HTMLElement.
 
-Реализует следующие методы:
+2. Класс Form<T>
 
-- onCreateOrder(): void - ступенчато открывает модальные окна для "авторизации" пользователя
-- renderProducts(): void - отображает на странице пользователя актуальную информацию по товарам
-- privewProduct(id): void - отображает модальное окно с подробной информацией о продукте
-- buildProductHtml(product): HTMLElement - собирает HTMLElement для отображения пользователю
-
-2. Класс User
-
-Класс проекта содержащий информацию о пользователе
-
-Конструктор не принимает аргументов
+Для управления формами проекта, реализует методы для отслеживания изменения состояний свойств, рендера и отправка формы.
+Конструктор принимает элемент с которым будет происходить взаимодействие и функцию вызывающаяся для события submit.
 
 Класс имеет такие методы:
 
-- setValue(type: valueType, value: string): void - устанавливает значение свойству класса User
-- clearValue(): void - очищает свойства класса User
+- onInputChange для отслеживания изменения свойств формы.
+- render для заполнения свойств элемента и получения его в формате HTMLElement.
 
-type valueType = address | email | phone | paymentType
+3. Класс Model<T>
 
-3. Класс Cart
+Базовая модель для того что бы ее можно было отличить от простых объектов с данными, реализует методы отслеживания изменений компонентов.
+Конструктор принимает компонент для отслеживания.
 
-Класс проекта реализует взаимодействие с корзиной пользователя
+Класс имеет такие методы:
 
-Конструктор принимает на вход инстанс класса Store
+- emitChanges сообщает об изменение модели
 
-Содержит следующие свойства:
+4. Класс EventEmitter
 
-- cart: Product[] - список товаров в корзине пользователя
-- api: Api - класс для взаимодействия с внешним Api
+Реализует паттерн «Наблюдатель» и позволяет подписываться на события и уведомлять подписчиков
+о наступлении события.
+Класс имеет методы on , off , emit — для подписки на событие, отписки от события и уведомления
+подписчиков о наступлении события соответственно.
+Дополнительно реализованы методы onAll и offAll — для подписки на все события и сброса всех
+подписчиков.
+Интересным дополнением является метод trigger , генерирующий заданное событие с заданными
+аргументами. Это позволяет передавать его в качестве обработчика события в другие классы. Эти
+классы будут генерировать события, не будучи при этом напрямую зависимыми от
+класса EventEmitter.
 
-Реализует следующие методы:
+!Компоненты и модели данных (бизнес-логика)
 
-- onAddProduct(id): void - добавляет выбранный товар в корзину
-- onRemoveProduct(id): void - убирает выбранный товар из корзины
-- renderProduct(): void - загрузить корзину с товарами пользователя
-- toggleCart(): void - открыть/закрыть модальное окно с корзиной
-- buildProductHtml(): HTMLElement - собирает HTMLElement для отображения пользователю
+1. Класс AppState
 
-4. Класс Modal
+Осуществляет управление состоянием всего приложения (корзина, заказ, главная страница).
+Ключевые методы:
 
-Класс проекта реализует открытие и закрытие модальных окон
+- addProductInBasket добавить товар в корзину.
+- removeProductFromBasket удалить товар из корзины.
+- getBasket получить список товаров.
+- setPreview установить превью товара.
+- setCatalog установить товары в каталог.
+- getTotalPrice получить стоимость всех товаров из корзины.
+- clearBasket очистить корзину.
+- setOrderField установить значения поля заказа.
+- validateOrder валидация полей заказа.
+- clearOrder очистить поля заказа.
 
-Конструктор не принимает аргументов
+!Компоненты представления
 
-Содержит следуюие свойства:
+1. Класс BasketUI
+   Выводит в контейнере корзину с товарами.
 
-- currentModal: string | null - текущее открытое окно (null - нет открытых окон)
+2. Класс ModalUI
+   Отображает и закрывает модальные окна.
 
-Реализует следующие методы:
+3. Класс PageUI
+   Отображает в контейнере главную странцу сайта.
 
-- open(id): HTMLElement - открывает (и закрывает старое если открыто) модальное окно и возвращает HTML элемент
-- close(id): void - закрывает модальное окно
+4. Класс ProductUI
+   Отображает в контейнере данные о товаре.
+
+4.1 Класс BasketItemUI
+Расширяет класс ProductUI для отображения товаров в корзине.
+
+4.2 Класс CatalogItemUI
+Расширяет класс ProductUI для отображения товаров на главной странице.
+
+5. OrderUI
+   Отображет в контейнере страницу оформления заказа.
+
+6. SuccessUI
+   Отображает в контейнере результат оформления заказа.
+
+!Ключевые типы данных
+
+interface IBasketView {
+items: HTMLElement[];
+total: number;
+}
+
+interface IProductActions {
+onClick: (event: MouseEvent) => void;
+}
+
+interface IProductUI<T> {
+index: number;
+title: string;
+description: string;
+price: string;
+image: string;
+category: string;
+status: T;
+}
+
+type CatalogChangeEvent = {
+catalog: IProduct[];
+};
+
+interface IFormState {
+valid: boolean;
+errors: string[];
+}
+
+interface IModalData {
+content: HTMLElement;
+}
+
+interface IPage {
+counter: number;
+catalog: HTMLElement[];
+locked: boolean;
+}
+
+interface ISuccess {
+title: string;
+description: string;
+}
+
+interface ISuccessActions {
+onClick: () => void;}
+
+interface IProduct {
+id: string;
+title: string;
+price: number;
+description: string;
+image: string;
+category: string;
+status: boolean;
+}
+
+interface IOrderForm {
+email: string;
+phone: string;
+address: string;
+payment: string;
+}
+
+interface IOrder extends IOrderForm {
+items: string[]
+}
+
+type FormErrors = Partial<Record<keyof IOrder, string>>;
+
+interface IOrderResult {
+id: string[];
+total: number;
+error?: string;
+}
+
+interface IWebLakerApi {
+getProducts: () => Promise<Products>;
+getProduct: (id: string) => Promise<IProduct>;
+createOrder: (order: IOrder) => Promise<IOrderResult>;
+}
+
+!Ивенты
+
+const Events = {
+['ITEMS_CHANGED']: 'items:changed',
+['ADD_PRODUCT']: 'cart:add-product',
+['REMOVE_PRODUCT']: 'cart:remove-product',
+['CREATE_ORDER']: 'cart:create_order',
+['OPEN_PREVIEW']: 'product:open-preview',
+['CHANGED_PREVIEW']: 'product:changed-preview',
+['BASKET_OPEN']: 'cart:open',
+['FORM_ERRORS_CHANGE']: 'formErrors:changed',
+['ORDER_OPEN'] : 'order:open',
+['SET_PAYMENT_TYPE'] : 'order:setPaymentType',
+['MODAL_OPEN'] : 'modal:open',
+['MODAL_CLOSE'] : 'modal:close',
+};
