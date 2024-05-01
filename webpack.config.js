@@ -10,7 +10,7 @@ require('dotenv').config({
   path: path.join(process.cwd(), process.env.NODE_ENV ? `.env.${process.env.NODE_ENV}` : '.env')
 });
 
-const isProduction = process.env.NODE_ENV == "production";
+const inProduct = process.env.NODE_ENV == "product";
 
 const stylesHandler = MiniCssExtractPlugin.loader;
 
@@ -36,7 +36,7 @@ const config = {
     // Add your plugins here
     // Learn more about plugins from https://webpack.js.org/configuration/plugins/
     new DefinePlugin({
-      'process.env.DEVELOPMENT': !isProduction,
+      'process.env.DEVELOPMENT': !inProduct,
       'process.env.API_ORIGIN': JSON.stringify(process.env.API_ORIGIN ?? '')
     })
   ],
@@ -87,8 +87,8 @@ const config = {
 };
 
 module.exports = () => {
-  if (isProduction) {
-    config.mode = "production";
+  if (inProduct) {
+    config.mode = "product";
   } else {
     config.mode = "development";
   }

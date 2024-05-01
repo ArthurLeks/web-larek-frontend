@@ -1,15 +1,25 @@
 import { IEvents } from './events';
 
+// Проверка, является ли объект экземпляром класса Model
 export const isModel = (obj: unknown): obj is Model<any> => {
 	return obj instanceof Model;
 };
-
+// Абстрактный класс Model с обобщенным типом T
 export abstract class Model<T> {
-	constructor(data: Partial<T>, protected events: IEvents) {
-		Object.assign(this, data);
-	}
+    
+    private _data: T;
+// Конструктор класса, принимающий частичные данные и интерфейс событий
+    constructor(data: Partial<T>, protected events: IEvents) {
+        Object.assign(this, data);
+    }
 
-	emitChanges(event: string, payload?: object) {
-		this.events.emit(event, payload ?? {});
-	}
+    
+    get data(): T {
+        return this._data;
+    }
+
+// Метод для генерации событий изменений
+    emitChanges(event: string, payload?: object) {
+        this.events.emit(event, payload ?? {});
+    }
 }

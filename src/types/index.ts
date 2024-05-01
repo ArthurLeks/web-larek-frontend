@@ -17,7 +17,7 @@ export interface IOrderResult {
 	error?: string;
 }
 
-export interface IProduct {
+export interface ICommodity {
 	id: string;
 	title: string;
 	image: string;
@@ -28,7 +28,7 @@ export interface IProduct {
 
 export interface Products {
 	total: number;
-	items: IProduct[];
+	items: ICommodity[];
 }
 
 export interface IOrder {
@@ -37,14 +37,14 @@ export interface IOrder {
 	phone: string;
 	address: string;
 	total: number;
-	items: IProduct['id'][];
+	items: ICommodity['id'][];
 }
 
-export type TypeRender = 'store' | 'basket'
+export type TypeRender = 'hist' | 'basket'
 
 export interface IWebLakerApi {
 	getProducts: () => Promise<Products>;
-	getProduct: (id: string) => Promise<IProduct>;
+	getProduct: (id: string) => Promise<ICommodity>;
 	createOrder: (order: IOrder) => Promise<IOrderResult>;
 }
 
