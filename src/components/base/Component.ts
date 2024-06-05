@@ -1,46 +1,46 @@
-// Абстрактный класс, представляющий компонент.
+
+
 export abstract class Component<T> {
-    protected constructor(protected readonly container: HTMLElement) {}
+	protected constructor(protected readonly container: HTMLElement) {
+	}
 
-    // Переключает CSS класс на элементе.
-    toggleClass(element: HTMLElement, className: string, force?: boolean): void {
-        element.classList.toggle(className, force);
-    }
 
-    // Устанавливает текстовое содержимое элемента.
-    protected setText(element: HTMLElement, value: unknown): void {
-        if (element) {
-            element.textContent = value === undefined || value === null ? '' : String(value);
-        }
-    }
+	toggleClass(element: HTMLElement, className: string, force?: boolean) {
+		element.classList.toggle(className, force);
+	}
 
-    // Устанавливает состояние disabled для кнопки или input элемента.
-    setDisabled(element: HTMLElement, state: boolean): void {
-        if (element instanceof HTMLButtonElement || element instanceof HTMLInputElement) {
-            element.disabled = state;
-        }
-    }
+	protected setText(element: HTMLElement, value: unknown) {
+		if (element) {
+			element.textContent = String(value);
+		}
+	}
 
-    // Добавляет класс 'hidden' к элементу для скрытия.
-    protected setHidden(element: HTMLElement): void {
-        element.classList.add('hidden');
-    }
-    // Удаляет класс 'hidden' с элемента для отображения.
-    protected setVisible(element: HTMLElement): void {
-        element.classList.remove('hidden');
-    }
+	setDisabled(element: HTMLElement, state: boolean) {
+		if (element) {
+			if (state) element.setAttribute('disabled', 'disabled');
+			else element.removeAttribute('disabled');
+		}
+	}
 
-    // Устанавливает src и alt атрибуты для элемента изображения.
-    protected setImage(element: HTMLImageElement, src: string, alt: string = ''): void {
-        element.src = src;
-        element.alt = alt;
-    }
+	protected setHidden(element: HTMLElement) {
+		element.style.display = 'none';
+	}
 
-    // Отображает компонент с опциональными данными.
-    render(data?: Partial<T>): HTMLElement {
-        if (data) {
-            Object.assign(this, data);
-        }
-        return this.container;
-    }
+	protected setVisible(element: HTMLElement) {
+		element.style.removeProperty('display');
+	}
+
+	protected setImage(element: HTMLImageElement, src: string, alt?: string) {
+		if (element) {
+			element.src = src;
+			if (alt) {
+				element.alt = alt;
+			}
+		}
+	}
+
+	render(data?: Partial<T>): HTMLElement {
+		Object.assign(this as object, data ?? {});
+		return this.container;
+	}
 }

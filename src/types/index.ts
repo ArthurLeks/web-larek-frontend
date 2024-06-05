@@ -1,54 +1,42 @@
-export interface IOrderForm {
-    email: string;
-    phone: string;
-	address: string;
-	payment: string;
-}
+import { IEvents } from '../components/base/events';
 
-export interface IOrder extends IOrderForm {
-    items: string[]
-}
-
-export type FormErrors = Partial<Record<keyof IOrder, string>>;
-
-export interface IOrderResult {
-    id: string[];
-	total: number;
-	error?: string;
-}
-
-export interface ICommodity {
+export interface IProduct {
 	id: string;
 	title: string;
-	image: string;
-	price: number;
 	description: string;
+	image: string;
+	price: number | null;
 	category: string;
 }
 
-export interface Products {
-	total: number;
-	items: ICommodity[];
+
+export interface IOrderFormData {
+	address: string;
+	payment: string;
 }
 
-export interface IOrder {
-	payment: string;
+export interface IContactFormData {
 	email: string;
 	phone: string;
-	address: string;
+}
+
+export interface ISuccessFormData {
 	total: number;
-	items: ICommodity['id'][];
 }
 
-export type TypeRender = 'hist' | 'basket'
+export type IOrder = IContactFormData & IOrderFormData;
 
-export interface IWebLakerApi {
-	getProducts: () => Promise<Products>;
-	getProduct: (id: string) => Promise<ICommodity>;
-	createOrder: (order: IOrder) => Promise<IOrderResult>;
+export type IFormErrors = Partial<IOrder>;
+
+export interface IOrderResult {
+	id: string;
+	total: number;
 }
+export interface IAppState {
+	catalog: IProduct[];
+	basket: IProduct[];
+	order: IOrder;
+	formErrors: IFormErrors;
+	events: IEvents;
 
-export interface IOrderForm {
-    email: string;
-    phone: string;
 }

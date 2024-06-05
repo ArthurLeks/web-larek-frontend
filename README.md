@@ -3,15 +3,11 @@
 Стек: HTML, SCSS, TS, Webpack
 
 Структура проекта:
-
 - src/ — исходные файлы проекта
 - src/components/ — папка с JS компонентами
 - src/components/base/ — папка с базовым кодом
-- src/components/base/hist — папка с базовым кодом
-- src/components/base/hist/case — папка с базовым кодом
 
 Важные файлы:
-
 - src/pages/index.html — HTML-файл главной страницы
 - src/types/index.ts — файл с типами
 - src/index.ts — точка входа приложения
@@ -44,257 +40,276 @@ npm run build
 ```
 yarn build
 ```
-# Описание классов 
 
-- Класс Component<T> является абстрактным и параметризованным.
-- Конструктор класса принимает элемент container типа HTMLElement и делает его доступным только для чтения.
-- Метод toggleClass переключает класс у элемента element в зависимости от наличия класса className и значения force.
-- Метод setText устанавливает текстовое содержимое элемента element в зависимости от переданного значения value.
-- Метод setDisabled устанавливает состояние disabled для элемента element, если он является кнопкой или элементом ввода.
-- Метод setHidden скрывает элемент, добавляя ему класс hidden.
-- Метод setVisible делает элемент видимым, удаляя у него класс hidden.
-- Метод setImage устанавливает источник src и альтернативный текст alt для элемента изображения element.
-- Метод render отображает данные, переданные в виде частичного объекта data, и возвращает элемент container.
 
-## Events.ts
+# Архитектура приложения
 
-- Определение типов данных EventName, Subscriber и EmitterEvent
-- Интерфейс IEvents с методами on, emit и trigger для работы с событиями
-- Класс EventEmitter, реализующий интерфейс IEvents
-- Конструктор класса EventEmitter и инициализация Map для хранения событий и подписчиков
-- Метод on для подписки на событие, добавляющий колбэк в соответствующий набор подписчиков
-- Метод off для отписки от события, удаляющий указанный колбэк из набора подписчиков
-- Метод emit для вызова колбэков подписчиков при срабатывании события
-- Метод onAll для подписки на все события
-- Метод offAll для отписки от всех событий
-- Метод trigger для создания функции, которая вызывает emit с указанным событием и контекстом
+## Базовый код (базовые классы)
 
-## Model.ts
+### class Api 
 
-- Класс, описанный выше, представляет базовую модель, которая отличается от обычных объектов данных тем, что реализует методы отслеживания изменений компонентов. Он принимает компонент для отслеживания в своем конструкторе.
+Отвечает за работу с сервером.
 
-- Методы класса включают:
+Конструктор класса:
 
-- emitChanges(): Этот метод используется для сообщения о изменениях в модели.
+baseUrl: string - url сервера для отправки запросов
+options: RequestInit - объект настроек
 
-## Basket.ts 
+Методы класса:
 
-- В файле импортируются функции createElement и ensureElement из утилитарного модуля, а также класс Component и интерфейс IEvents.
-- Есть интерфейс IBasketView, описывающий структуру данных для представления корзины.
-- Класс Basket наследуется от Component<IBasketView> и имеет защищенные свойства для списка, общей суммы, кнопки, элементов, общей суммы и выбранных элементов.
-- В конструкторе класса устанавливаются свойства для списка, общей суммы и кнопки, инициализируется кнопка.
-- Метод _initButton устанавливает обработчик события на кнопку для открытия заказа.
-- Свойство items устанавливает элементы корзины, обновляет список и делает кнопку неактивной, если корзина пуста.
-- Свойство total устанавливает общую сумму и обновляет текст элемента.
-- Свойство selected устанавливает выбранные элементы.
-- Метод _setText устанавливает текст элемента, если элемент существует.
+handleResponse(response: Response): Promise<object> - обрабатывает ответ от сервера
+get(uri: string) - выполняет get запрос
+post(uri: string, data: object, method: ApiPostMethods = 'POST') - выполняет post запрос
 
-## Form.ts 
 
-- handleFormSubmit - метод обработки отправки формы. Предотвращает стандартное действие отправки формы, запускает событие  submit для контейнера и выводит сообщение в консоль о том, что форма была отправлена.
-- handleInputChange - метод обработки изменения ввода. Получает целевой элемент, определяет поле и его значение, вызывает  метод onInputChange и выводит сообщение в консоль о том, что было инициировано входное событие.
-- onInputChange - метод для обработки изменения ввода. Генерирует событие с именем вида ${this.container.name}.${String(field)}:change, передавая поле и его значение.
-- valid - устанавливает значение свойства _submit.disabled в зависимости от переданного значения.
-- errors - устанавливает текст ошибок в элементе _errors.
-- render - метод для отображения состояния формы. Вызывает метод render родительского класса, передавая текущее состояние формы.
+### Класс EventEmitter
 
-## Conditional.ts
+Брокер событий, отвечает за работу с событиями. Позволяет создавать, удалять, вызывать события.
 
-- constructor(container: HTMLElement, events: IEvents):
-- Принимает элемент контейнера и объект событий.
-- Инициализирует кнопку закрытия, контент и добавляет обработчики событий.
-- set content(value: HTMLElement):
-- Устанавливает новый контент в модальное окно.
-- open():
-Открывает модальное окно и эмитирует событие 'modal:open'.
-- close():
-Закрывает модальное окно, очищает контент и эмитирует событие 'modal:close'.
-- render(data: IModalData): HTMLElement:
-Рендерит модальное окно с переданными данными, открывает его и возвращает элемент контейнера.
-- destroy():
-Удаляет обработчики событий для кнопки закрытия, контейнера и контента.
-- setContent(content: HTMLElement):
-Устанавливает контент модального окна.
-- updateContent(content: HTMLElement):
-Обновляет контент модального окна.
+Методы класса:
 
-## Order.ts
+on - Установить обработчик на событие
+off - Снять обработчик с события
+emit - Инициировать событие с данными
+onAll - Слушать все события
+offAll - Сбросить все обработчики
+trigger - Сделать коллбек триггер, генерирующий событие при вызове
 
-Конструктор класса Order:
+### Класс Component 
 
-- Принимает контейнер и события.
-- Вызывает конструктор родительского класса.
-- Находит все кнопки с классом 'button_alt' в контейнере и преобразует их в массив.
-- Для каждой кнопки добавляет обработчик события 'click', который вызывает метод handleAltButtonClick с привязкой контекста.
-- Устанавливает атрибут 'aria-pressed' в значение 'false' для каждой кнопки.
-- Метод handleAltButtonClick:
+Абстрактный класс, служит для работы с DOM элементами в компонентах view слоя.
+Класс является дженериком и принимает в переменной T тип данных представлюящий собой информацию которая нужна конкретному компоненту.
+Содержит методы по работе с различными аттрибутами HTML элементов.
 
-- Принимает нажатую кнопку в качестве аргумента.
-- Проверяет, не равна ли текущая активная кнопка нажатой кнопке.
-- Если есть активная кнопка, удаляет у нее класс 'button_alt-active' и устанавливает 'aria-pressed' в 'false'.
-- Добавляет класс 'button_alt-active' к нажатой кнопке, устанавливает 'aria-pressed' в 'true' и обновляет активную кнопку.
-- Устанавливает тип оплаты в соответствии с именем кнопки.
-- Метод setFieldValue:
+### Класс Model
 
-- Устанавливает значение поля формы по имени поля.
-- Находит элемент формы по имени поля и устанавливает ему значение.
-- Метод set payment:
+Абстрактный класс, чтобы можно было отличить ее от простых объектов с данными.
+Класс является дженериком и принимает в переменной T тип данных представлюящий собой информацию которую будет содержать модель.
 
-- Устанавливает тип оплаты и вызывает соответствующее событие.
-- Метод get payment:
+Методы класса:
 
-- Возвращает текущий тип оплаты.
-- Метод validateForm:
+emitChanges(event: string, payload?: object) - Сообщить что модель поменялась
 
-- Проверяет валидность формы.
-- В данном случае всегда возвращает true, так как метод не реализован.
-- Метод unsubscribeEvents:
+## Компоненты отображения
 
-- Отписывается от событий при удалении объекта.
-- Удаляет обработчик клика для каждой альтернативной кнопки.
 
-## Page.ts 
+### Класс Form
 
-- handleBasketClick() (обработчик клика по корзине): Метод обрабатывает клик по элементу корзины и вызывает событие "basket:open".
-- counter (свойство): Устанавливает значение счётчика корзины.
-- catalog (свойство): Устанавливает элементы каталога.
-- locked (свойство): Устанавливает блокировку страницы путём добавления/удаления класса "page__wrapper_locked".
-- updateBasketContent(content: string) (метод): Обновляет содержимое корзины переданным текстом.
-- clearCatalog() (метод): Очищает весь HTML внутри каталога.
+Служит общим классом для форм в проекте.
+
+Поля класса:
+
+_submit: HTMLButtonElement;
+_errors: HTMLElement;
+
+Методы класса:
+
+set valid(value: boolean) - для установки/снятия атрибута disabled кнопки отправки формы
+set errors(value: string) - для установки текста в контейнер с ошибкой
+onInputChange(field: keyof T, value: string) - обработчик, который срабатывает на изменение поля ввода
+clearForm() - сбрасывает данные формы
+
+### Класс Modal
+
+Служит для отображения модального окна.
+
+Поля класса:
+
+_content: HTMLElement;
+_closeButton: HTMLButtonElement;
+
+Методы класса:
+
+set content(value: HTMLElement) - для установки внутреннего контента модального окна
+open() - для открытия модального окна
+close() - для закрытия модельного окна
+render(data: IModal): HTMLElement - для отображения модального окна
 
 
 
-## Commodity класс:
+### Класс Card
 
-- constructor: конструктор класса.
-- id: устанавливает и возвращает идентификатор продукта.
-- title: устанавливает и возвращает название продукта.
-- category: устанавливает и возвращает категорию продукта.
-- price: устанавливает и возвращает цену продукта.
-- image: устанавливает изображение продукта.
-- description: устанавливает и возвращает описание продукта.
-- CardItem класс:
+Служит для отображения карточек на главной странице. Наследуется от абстрактного класса Component.
 
-- constructor: конструктор класса.
-- status: устанавливает статус элемента в корзине.
+Поля класса: 
 
-- BasketItem класс:
+_id?: string;
+_category?: HTMLElement;
+_title: HTMLElement;
+_image?: HTMLImageElement;
+_price?: HTMLElement;
+_description?: HTMLElement;
+_button?: HTMLButtonElement;
 
-- constructor: конструктор класса.
-- index: устанавливает индекс элемента в корзине.
-- additionalElement: устанавливает и возвращает дополнительный элемент.
+для каждого поля реализованы геттеры и сеттеры для установки и получения значения из HTML элементов
 
-## Success.ts 
 
-- Класс `Success` наследуется от компонента `Component` и имеет два обобщенных типа: `ISuccess` и `ISuccessActions`.
-- Интерфейс `ISuccess` содержит поля `title` и `description`, оба типа `string`.
-- Интерфейс `ISuccessActions` содержит опциональное поле `onClose`, которое является функцией без параметров и возвращаемого значения.
-- Класс `Success` имеет приватные свойства `closeBtn`, `titleElement` и `descriptionElement`, которые представляют элементы DOM.
-- Конструктор класса `Success` принимает контейнер `container` типа `HTMLElement` и объект `actions` типа `ISuccessActions`.
-- В конструкторе инициализируются элементы DOM и добавляются слушатели событий.
-- Метод `initializeListeners` добавляет слушатель события клика на кнопку закрытия, если передана функция `onClose`.
-- Свойство `title` устанавливает текст заголовка элемента `titleElement`.
-- Свойство `description` устанавливает текст описания элемента `descriptionElement`.
-- Метод `setDescriptionColor` устанавливает цвет текста описания.
-- Метод `toggleVisibility` переключает класс `hidden` для контейнера.
-- Свойство `titleFontSize` устанавливает размер шрифта заголовка.
-- Метод `setSuccessType` устанавливает класс контейнера в зависимости от переданного типа: `info`, `warning`, `success` или `error`.
+### Класс Basket
 
-WebData.ts 
+Служит для отображения корзины. Наследуется от абстрактного класса Component.
 
-- addProductToBasket: метод для добавления товара в корзину. Проверяет, есть ли товар уже в корзине, добавляет его и обновляет общую стоимость корзины.
-- updateBasketTotal: метод для обновления общей стоимости корзины на основе товаров в ней.
-- removeProductFromBasket: метод для удаления товара из корзины.
-- getBasket: метод для получения списка товаров в корзине.
-- setPreview: метод для установки предпросмотра товара.
-- setCatalog: метод для установки каталога товаров.
-- getTotal: метод для получения общей стоимости товаров в корзине.
-- clearBasket: метод для очистки корзины.
-- setOrderField: метод для установки поля заказа.
-- emitOrderReadyEvent: приватный метод для отправки события о готовности заказа.
-- validateOrder(field: keyof IOrderForm): Метод, который проверяет данные заказа в зависимости от указанного поля. Если поле не является 'address' или 'payment', то проверяет email и телефон на корректность. Если поле 'address' или 'payment', то проверяет адрес и тип оплаты. В случае ошибок, обновляет форму ошибок и возвращает результат проверки на валидность.
-- updateFormErrors(errors: Record<string, string>): Метод, который обновляет ошибки формы согласно переданным ошибкам и отправляет событие 'formErrors:change' с обновленными ошибками.
-- isFormValid(errors: typeof this.formErrors): Метод, который проверяет, является ли форма валидной, основываясь на количестве ошибок. Возвращает true, если ошибок нет, иначе false.
+Поля класса: 
 
-## LarekApi.ts 
+_list: HTMLElement;
+_total: HTMLElement;
+_button: HTMLElement;
 
-- constructor(baseUrl: string, options?: RequestInit)
+Методы класса:
 
-- Конструктор класса, принимающий базовый URL и опции запроса.
-- async getProducts(): Promise<Products>
+set list(items: HTMLElement[]) - для добавления товаров в корзину
+set total(total: number) - для установки общей цены товаров в корзине
 
-- Метод для получения списка продуктов.
-- Возвращает список продуктов в формате Products.
-- async getProduct(id: string): Promise<ICommodity>
 
-- Метод для получения информации о продукте по его ID.
-- Принимает ID продукта в виде строки.
-- Возвращает информацию о продукте в формате ICommodity.
-- async createOrder(order: IOrder): Promise<IOrderResult>
+### Класс ContactForm
 
-- Метод для создания заказа.
-- Принимает информацию о заказе в виде объекта IOrder.
-- Возвращает результат создания заказа в формате IOrderResult.
-- private async fetchData(endpoint: string, options?: RequestInit): Promise<any>
+Служит для отображения формы, хранящей данные клиента. Наследуется от класса Form.
 
-- Приватный метод для отправки запроса на указанный эндпоинт.
-- Принимает эндпоинт и опции запроса.
-- Возвращает данные, полученные в результате запроса.
+Поля класса:
 
-## Типы данных 
+_name: HTMLInputElement;
+_email: HTMLInputElement;
 
-export interface IOrderForm {
-    email: string;
-    phone: string;
-	address: string;
-	payment: string;
-}
+Методы класса:
 
-export interface IOrder extends IOrderForm {
-    items: string[]
-}
+set name (value: string) - для установки имени
+set email (value: string) - для установки email
 
-export type FormErrors = Partial<Record<keyof IOrder, string>>;
+### Класс OrderForm
 
-export interface IOrderResult {
-    id: string[];
-	total: number;
-	error?: string;
-}
+Служит для отображения формы, хранящей данные о заказе (выбор способа оплаты и адрес клиента). Наследуется от класса Form.
 
-export interface ICommodity {
+Поля класса:
+
+_paymentButtons : HTMLButtonElement[];
+_address: HTMLInputElement;
+
+Методы класса:
+
+set address (value: string) - для установки адреса
+set paymentButton (name: string) - для выбора метода оплаты
+
+clearForm() - очистка формы и сброс выбранного способа оплаты
+
+
+### Класс Page
+
+Служит для отображения главной страницы приложения. Наследуется от абстрактного класса Component.
+
+Поля класса:
+
+_counter: HTMLElement;
+_catalog: HTMLElement;
+_basket: HTMLButtonElement;
+_wrapper: HTMLElement;
+
+Методы класса:
+
+set counter(value: number) - Установить значение счетчика товаров в корзине
+set catalog(cards: HTMLElement[]) -  Установить карточки в галерею
+set locked(value: boolean) - Установить/снять блокировку прокрутки страницы
+
+### Класс SuccessForm
+
+Служит для отображения формы, отображающейся после успешного создания заказа. Наследуется от класса Form.
+
+Поля класса:
+
+protected _description: HTMLElement;
+protected _closeButton: HTMLButtonElement;
+
+Методы класса:
+
+set total(value: number)  - для установки количества потраченных синапсов после покупки 
+
+
+### Класс LarekApi
+
+Служит для связи с сервером, отправки get и post запросов в приложении.
+
+Поля класса: 
+
+_cdn: string;
+
+Методы класса:
+
+getProduct(id: string):Promise<IProduct> - для получения одного товара по его id
+getProductsCatalog():Promise<IProduct[]> - для получения списка всех товаров
+order(data: IOrder): Promise<IOrderResult> - для создания заказа
+
+### Класс AppData 
+
+Служит для хранения и обработки всех данных в приложении. Наследуется от базового класса Model.
+
+Поля класса:
+
+basket: IProduct[] = [];
+catalog: IProduct[] = [];
+order: IOrder = {
+    email: '',
+    phone: '',
+    address: '',
+    payment: '',
+};
+formErrors: IFormErrors = {};
+
+Методы класса:
+
+
+setBasket(items: IProduct[])  - для добавления товаров в корзину
+getBasket() - для получения всех товаров в корзине
+getBasketIds() - для получения id всех товаров в корзине
+deleteItemFromBasket(id: string) - для удаления одного товара из корзины
+addItemToBasket(item: IProduct) - для добавления одного товара в корзину
+clearBasket() - для очистки корзины
+getTotal() - для получения суммарной стоимости товаров в корзине
+setCatalog(items: IProduct[]) - для установки каталога товаров
+setOrderField(field: keyof IOrder, value: string) - для установки значения в поле field объекта order
+validateOrder() - для валидации данных о заказе
+clearOrder() - для очистки информации о заказе
+
+## Основные типы данных
+
+``` 
+
+export interface IProduct {
 	id: string;
 	title: string;
-	image: string;
-	price: number;
 	description: string;
+	image: string;
+	price: number | null;
 	category: string;
 }
 
-export interface Products {
-	total: number;
-	items: ICommodity[];
+
+export interface IOrderFormData {
+	address: string;
+	payment: string;
 }
 
-export interface IOrder {
-	payment: string;
+export interface IContactFormData {
 	email: string;
 	phone: string;
-	address: string;
+}
+
+export interface ISuccessFormData {
 	total: number;
-	items: ICommodity['id'][];
 }
 
-export type TypeRender = 'hist' | 'basket'
+export type IOrder = IContactFormData & IOrderFormData;
 
-export interface IWebLakerApi {
-	getProducts: () => Promise<Products>;
-	getProduct: (id: string) => Promise<ICommodity>;
-	createOrder: (order: IOrder) => Promise<IOrderResult>;
+export type IFormErrors = Partial<IOrder>;
+
+export interface IOrderResult {
+	id: string;
+	total: number;
+}
+export interface IAppState {
+	catalog: IProduct[];
+	basket: IProduct[];
+	order: IOrder;
+	formErrors: IFormErrors;
+	events: IEvents;
+
 }
 
-export interface IOrderForm {
-    email: string;
-    phone: string;
-}
-
+```
