@@ -1,5 +1,5 @@
 import { Api, ApiListResponse } from './base/api';
-import { IOrder, IOrderResult, IProduct } from '../types';
+import { IOrder, IOrderPost, IOrderResult, IProduct } from '../types';
 
 export class LarekApi extends Api {
 	protected _cdn: string;
@@ -26,7 +26,7 @@ export class LarekApi extends Api {
 		})))
 	}
 
-	order(data: IOrder): Promise<IOrderResult> {
+	order(data: IOrderPost): Promise<IOrderResult> {
 		return this.post(`/order`, data).then((res: IOrderResult) => res)
 	}
 }

@@ -14,12 +14,34 @@ export class Card extends Component<IProduct> {
 	protected _price?: HTMLElement;
 	protected _description?: HTMLElement;
 	protected _button?: HTMLButtonElement;
+	protected _deleteButton?: HTMLButtonElement;
+	protected _index: HTMLElement;
 
 	constructor(protected blockName: string, container: HTMLElement, actions?: ICardActions) {
 		super(container);
 
+		this._category = this.container.querySelector(`.card__category`);
+		this._title = ensureElement<HTMLElement>(
+			`.${blockName}__title`,
+			this.container
+		);
+		this._image = this.container.querySelector(`.card__image`);
+
+		this._description = this.container.querySelector(`.${blockName}__text`);
+		// this._index = this.container.querySelector(`.basket__item-index`);
+
+		this._button = this.container.querySelector(`.${blockName}__button`);
+		this._index = this.container.querySelector(`.basket__item-index`);
+
+		this._deleteButton = container.querySelector(`.basket__item-delete`);
+		if (this._deleteButton) {
+			this._deleteButton.addEventListener(`click`, (evt) => {
+				actions.onClick(evt);
+			});
+		}
+
 		this._title = ensureElement<HTMLElement>(`.${blockName}__title`, container);
-		this._image = ensureElement<HTMLImageElement>(`.${blockName}__image`, container);
+		// this._image = ensureElement<HTMLImageElement>(`.${blockName}__image`, container);
 		this._price = ensureElement<HTMLImageElement>(`.${blockName}__price`, container);
 		this._button = container.querySelector(`.${blockName}__button`);
 		this._description = container.querySelector(`.${blockName}__text`);
@@ -57,15 +79,35 @@ export class Card extends Component<IProduct> {
 		this.setText(this._description, value)
 	}
 
-	set price (value: number | null) {
-		if (value) {
-			this.setText(this._price, value.toString() + " синапсов");
+	set price(value: number | null) {
+		if (value === null) {
+			this.setText(this._price, `Бесценно`);
+			this.setDisabled(this._button, true);
+			this.setText(this._button, `Нельзя купить`);
 		} else {
-			this.setText(this._price, "Бесценно");
+			this.setText(this._price, value + ` синапсов`);
 		}
 	}
 
 	get price() {
 		return parseInt(this._price.textContent);
+	}
+
+	set button(value: string) {
+		if (this.price) {
+			this.setText(this._button, value);
+		} else {
+			this.setText(this._button, `Нельзя купить`);
+		}
+	}
+
+	setButtonText(value: boolean) {
+		if (value) {
+			this.button = `Убрать из корзины`;
+		} else this.button = `В корзину`;
+	}
+
+	set index(value: number) {
+		this.setText(this._index, value);
 	}
 }

@@ -7,6 +7,7 @@ export interface IProduct {
 	image: string;
 	price: number | null;
 	category: string;
+	index?: number
 }
 
 
@@ -39,4 +40,10 @@ export interface IAppState {
 	formErrors: IFormErrors;
 	events: IEvents;
 
+}
+
+
+export type IOrderPost = IOrder & {
+	total: number;
+	items: string[];
 }

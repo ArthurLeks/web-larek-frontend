@@ -1,10 +1,10 @@
 import { Model } from '../base/Model';
 import { IAppState, IFormErrors, IOrder, IProduct } from '../../types';
 
-export class AppState extends Model<IAppState> {
+export class AppData extends Model<IAppState> {
 	protected basket: IProduct[] = [];
 	protected catalog: IProduct[] = [];
-	protected order: IOrder = {
+	public order: IOrder = {
 		email: '',
 		phone: '',
 		address: '',
@@ -18,6 +18,10 @@ export class AppState extends Model<IAppState> {
 	}
 	getBasket() {
 		return this.basket;
+	}
+
+	isInBasket(id: string): boolean {
+		return this.basket.some((card) => card.id === id);
 	}
 
 	getBasketIds() {
@@ -47,26 +51,42 @@ export class AppState extends Model<IAppState> {
 		this.emitChanges('catalog:changed', { catalog: this.catalog });
 	}
 
+	getCatalog() {
+		return this.catalog;
+	}
 
 	setOrderField(field: keyof IOrder, value: string) {
 		this.order[field] = value;
 
-		if (this.validateOrder()) {
-			this.events.emit('order:ready', this.order);
+		if (field === `address` || field === `payment`) {
+			this.validateOrderForm();
+		} else {
+			this.validateContactForm();
 		}
 	}
 
-	validateOrder() {
-		const errors: typeof this.formErrors = {};
-		if (!this.order.email) {
-			errors.email = 'Необходимо указать email';
+	validateOrderForm() {
+		const errors: IFormErrors = {};
+		if (!this.order.address) {
+			errors.address = `Введите адрес доставки`;
 		}
-		if (!this.order.phone) {
-			errors.phone = 'Необходимо указать телефон';
+		if (!this.order.payment) {
+			errors.payment = `Выберите способ оплаты`;
 		}
 		this.formErrors = errors;
-		this.events.emit('formErrors:change', this.formErrors);
-		return Object.keys(errors).length === 0;
+		this.emitChanges(`orderErrors:change`, this.formErrors);
+	}
+
+	validateContactForm() {
+		const errors: IFormErrors = {};
+		if (!this.order.email) {
+			errors.email = `Введите email`;
+		}
+		if (!this.order.phone) {
+			errors.phone = `Введите номер телефона`;
+		}
+		this.formErrors = errors;
+		this.emitChanges(`contactErrors:change`, this.formErrors);
 	}
 
 	clearOrder() {

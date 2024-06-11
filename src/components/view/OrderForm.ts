@@ -12,6 +12,13 @@ export class OrderForm extends Form<IOrderFormData> {
 		super(container ,event);
 		this._paymentButtons = ensureAllElements(".button_alt", this.container);
 		this._address = this.container.elements.namedItem("address") as HTMLInputElement;
+
+		this._paymentButtons.forEach((button) => {
+			button.addEventListener('click', () => {
+				this.paymentButton = button.name;
+				this.onInputChange(`payment`, button.name);
+			});
+		});
 	}
 
 
