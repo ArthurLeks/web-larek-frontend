@@ -59,49 +59,33 @@ events.on(`card:select`, (product: IProduct) => {
 			{
 				onClick: () => {
 					events.emit(`basket:toggleItem`, product);
-					cardPreview.setButtonText(appModel.isInBasket(product.id));
+					// cardPreview.setButtonText(appModel.isInBasket(product.id));
 				}
 			}
 	);
-	cardPreview.setButtonText(appModel.isInBasket(product.id));
+	// cardPreview.setButtonText(appModel.isInBasket(product.id));
 	modal.render({ content: cardPreview.render(product) });
 });
 
 events.on(`basket:toggleItem`, (product: IProduct) => {
-	if (!appModel.isInBasket(product.id)) {
-		appModel.addItemToBasket(product);
-	} else {
-		events.emit(`basket:deleteItem`, product)
-	}
+	// if (!appModel.isInBasket(product.id)) {
+	// 	appModel.addItemToBasket(product);
+	// } else {
+	// 	events.emit(`basket:deleteItem`, product)
+	// }
+	appModel.addItemToBasket(product);
 	page.counter = appModel.getBasket().length;
 });
 
 events.on(`basket:open`, () => {
-	const items = appModel.getBasket().map((card, index) => {
-		const itemInBasket = new Card(
-			`card`,
-			cloneTemplate(cardBasketTemplate),
-			{
-				onClick: () => {
-					events.emit(`basket:deleteItem`, card);
-				}
-			}
-		);
-		return itemInBasket.render({
-			title: card.title,
-			price: card.price,
-			index: index + 1,
-			id: card.id
-		});
-	});
 	modal.render({
-		content: basket.render({ list: items, total: appModel.getTotal() }),
+		content: basket.render({list: basket.list, total: basket.total}),
 	});
 });
 
 
 events.on(`basket:deleteItem`, (product: IProduct) => {
-	appModel.deleteItemFromBasket(product.id);
+	appModel.deleteItemFromBasket(product.id, product.index);
 });
 
 
@@ -130,7 +114,7 @@ events.on(`basket:changed`, () => {
 events.on('order:open', () => {
 	modal.render({
 		content: ordersForm.render({
-			valid: false,
+			valid: appModel.validateOrderForm(),
 			errors: [],
 		}),
 	});
@@ -177,7 +161,7 @@ events.on(
 events.on('order:submit', () => {
 	modal.render({
 		content: contactsForm.render({
-			valid: false,
+			valid: appModel.validateContactForm(),
 			errors: [],
 		}),
 	});
@@ -192,8 +176,7 @@ events.on('contacts:submit', () => {
 		})
 		.then((res) => {
 			events.emit(`order:complete`, res);
-			appModel.clearBasket();
-			appModel.clearOrder();
+			appModel.clearAll();
 			page.counter = 0;
 			ordersForm.clearForm();
 			contactsForm.clearForm();

@@ -28,18 +28,19 @@ export class AppData extends Model<IAppState> {
 		return this.basket.map((card) => card.id);
 	}
 
-	deleteItemFromBasket(id: string) {
-		this.basket = this.basket.filter((card) => card.id !== id);
+	deleteItemFromBasket(id: string, index: number) {
+		this.basket = this.basket.filter((card) => card.id !== id || card.index !== index);
 		this.emitChanges(`basket:changed`, { cards: this.basket });
 	}
 
-	addItemToBasket(item: IProduct) {
-		this.basket.push(item);
+	addItemToBasket(item: IProduct, index?: number) {
+		this.basket.push({...item, index: index || this.basket.length + 1});
 		this.emitChanges(`basket:changed`, { cards: this.basket });
 	}
 
 	clearBasket() {
 		this.basket = [];
+		this.emitChanges(`basket:changed`, { cards: [] });
 	}
 
 	getTotal() {
@@ -75,6 +76,7 @@ export class AppData extends Model<IAppState> {
 		}
 		this.formErrors = errors;
 		this.emitChanges(`orderErrors:change`, this.formErrors);
+		return Object.keys(errors).length === 0;
 	}
 
 	validateContactForm() {
@@ -87,6 +89,7 @@ export class AppData extends Model<IAppState> {
 		}
 		this.formErrors = errors;
 		this.emitChanges(`contactErrors:change`, this.formErrors);
+		return Object.keys(errors).length === 0;
 	}
 
 	clearOrder() {
@@ -98,8 +101,8 @@ export class AppData extends Model<IAppState> {
 		};
 	}
 
-
-
-
-
+	clearAll() {
+		this.clearOrder()
+		this.clearBasket()
+	}
 }

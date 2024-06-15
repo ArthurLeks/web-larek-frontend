@@ -27,7 +27,6 @@ export class Basket extends Component<IBasketView> {
 			events.emit('order:open');
 		});
 
-		this.list = [];
 	}
 
 	set list(items: HTMLElement[]) {
@@ -38,11 +37,20 @@ export class Basket extends Component<IBasketView> {
 				textContent: 'Корзина пуста'
 			}));
 		}
+	console.log(items)
 		this.setDisabled(this._button, items.length === 0)
+	}
+
+	get list(): HTMLElement[] {
+		return [...this._list.childNodes].filter(node => node instanceof HTMLLIElement) as HTMLElement[];
 	}
 
 
 	set total(total: number) {
 		this.setText(this._total, total + " синапсов");
+	}
+
+	get total(): number {
+		return parseInt(this._total.textContent) || 0;
 	}
 }

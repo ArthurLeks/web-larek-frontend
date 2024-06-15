@@ -20,38 +20,24 @@ export class Card extends Component<IProduct> {
 	constructor(protected blockName: string, container: HTMLElement, actions?: ICardActions) {
 		super(container);
 
-		this._category = this.container.querySelector(`.card__category`);
-		this._title = ensureElement<HTMLElement>(
-			`.${blockName}__title`,
-			this.container
-		);
-		this._image = this.container.querySelector(`.card__image`);
-
+		this._category = this.container.querySelector('.card__category');
+		this._title = ensureElement<HTMLElement>(`.${blockName}__title`, this.container);
+		this._image = this.container.querySelector('.card__image');
 		this._description = this.container.querySelector(`.${blockName}__text`);
-		// this._index = this.container.querySelector(`.basket__item-index`);
-
+		this._index = this.container.querySelector('.basket__item-index');
 		this._button = this.container.querySelector(`.${blockName}__button`);
-		this._index = this.container.querySelector(`.basket__item-index`);
+		this._deleteButton = container.querySelector('.basket__item-delete');
+		this._price = ensureElement<HTMLImageElement>(`.${blockName}__price`, container);
 
-		this._deleteButton = container.querySelector(`.basket__item-delete`);
 		if (this._deleteButton) {
-			this._deleteButton.addEventListener(`click`, (evt) => {
+			this._deleteButton.addEventListener('click', (evt) => {
 				actions.onClick(evt);
 			});
 		}
 
-		this._title = ensureElement<HTMLElement>(`.${blockName}__title`, container);
-		// this._image = ensureElement<HTMLImageElement>(`.${blockName}__image`, container);
-		this._price = ensureElement<HTMLImageElement>(`.${blockName}__price`, container);
-		this._button = container.querySelector(`.${blockName}__button`);
-		this._description = container.querySelector(`.${blockName}__text`);
-
 		if (actions?.onClick) {
-			if (this._button) {
-				this._button.addEventListener('click', actions.onClick);
-			} else {
-				container.addEventListener('click', actions.onClick);
-			}
+			const buttonToClick = this._button || container;
+			buttonToClick.addEventListener('click', actions.onClick);
 		}
 	}
 
@@ -59,8 +45,28 @@ export class Card extends Component<IProduct> {
 		this.container.dataset.id = value;
 	}
 
+
+
 	get id(): string {
 		return this.container.dataset.id || '';
+	}
+
+	set category(value: string) {
+		const categoryMap: Record<string, string> = {
+			"софт-скил": "soft",
+			"хард-скил": "hard",
+			"другое": "other",
+			"дополнительное": "additional",
+			"кнопка": "button",
+		};
+
+		const enCategory = categoryMap[value];
+
+		Object.values(categoryMap).forEach((category) => {
+			this.toggleClass(this._category, `card__category_${category}`, false);
+		})
+		this.toggleClass(this._category, `card__category_${enCategory}`, true);
+		this.setText(this._category, value);
 	}
 
 	set title(value: string) {
